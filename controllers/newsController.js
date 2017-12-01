@@ -10,17 +10,42 @@ var router = express.Router();
 var db = require("../models");
 // mongoose.Promise = Promise;
 
+function storeNews(result, i) {
+	return new Promise(function(resolve, reject) {
+
+      db.News
+        .create(result)
+        .then(function(dbNews) {
+          // If we were able to successfully scrape and save a News, send a message to the client
+          console.log("scrape complete: " + i);
+          // console.log(dbNews);
+          // res.send("Scrape Complete");
+          // newsArray.push(dbNews);
+          // console.log(i + ":" + newsArray);
+        })//.then
+        .catch(function(err) {
+        	console.log("here: " + i);
+          // If an error occurred, send it to the client
+          res.json(err);
+        });//catch
+        resolve();
+	}); //new Promise
+
+}
+
 // Import the model (News.js) to use its database functions.
 // var News = require("../models/News.js");
 // Create all our routes and set up logic within those routes where required.
 router.get("/scrape", function(req, res) {
 	db.News.remove({});
-	newsArray = [];
+	// var newsArray = [];
+	var promiseArray = [];
   // First, we grab the body of the html with request
   request("https://www.smashingmagazine.com/articles/", (error, response, html) => {
     // Then, we load that into cheerio and save it to $ for a shorthand selector
     var $ = cheerio.load(html);
 
+	// var promise = new Promise(function(resolve, reject) {
     // Now, we grab every h1,div,p within an article tag, and do the following:
     $("article").each(function(i, element) {
       // Save an empty result object
@@ -51,28 +76,34 @@ router.get("/scrape", function(req, res) {
       		return true;
       	}
 
+      	promiseArray.push(storeNews(result, i));
       // Create a new News using the `result` object built from scraping
-      db.News
-        .create(result)
-        .then(function(dbNews) {
-          // If we were able to successfully scrape and save a News, send a message to the client
-          console.log("scrape complete: " + i);
-          // console.log(dbNews);
-          // res.send("Scrape Complete");
-          // newsArray.push(dbNews);
-          // console.log(i + ":" + newsArray);
-        })//.then
-        .catch(function(err) {
-        	console.log("here: " + i);
-          // If an error occurred, send it to the client
-          res.json(err);
-        });//catch
-      }); //then new entry
+      // db.News
+      //   .create(result)
+      //   .then(function(dbNews) {
+      //     // If we were able to successfully scrape and save a News, send a message to the client
+      //     console.log("scrape complete: " + i);
+      //     // console.log(dbNews);
+      //     // res.send("Scrape Complete");
+      //     // newsArray.push(dbNews);
+      //     // console.log(i + ":" + newsArray);
+      //   })//.then
+      //   .catch(function(err) {
+      //   	console.log("here: " + i);
+      //     // If an error occurred, send it to the client
+      //     res.json(err);
+        // });//catch
+      }); //findOne .then new entry
     });// each
+    // resolve();
+	// }) //promise
+	Promise.all(promiseArray)
+	.then(function() {
+	    console.log('redirect');
+    	res.redirect("/news");
+	});
     // console.log(newsArray);
     // res.send(newsArray);
-    console.log('redirect');
-    res.redirect("/news");
   });//request
 });//get /
 
