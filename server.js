@@ -30,7 +30,8 @@ app.use(express.static("public"));
 // Connect to the Mongo DB
 mongoose.Promise = Promise;
 mongoose.set('debug', true);
-mongoose.connect("mongodb://localhost/newsscrape", {
+var MONGODB_URI = process.env.MONGODB_URI || "mongodb://localhost/newsscrape";
+mongoose.connect(MONGODB_URI, {
   useMongoClient: true
 });
 
