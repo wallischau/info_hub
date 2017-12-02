@@ -12,16 +12,21 @@ var db = require("../models");
 
 function storeNews(result, i) {
 	return new Promise(function(resolve, reject) {
-
+      //check if it is already in db
+      db.News
+      .findOne({title: result.title})
+      .then(function(dbNews) {  //check for new entry
+      	if(dbNews) {
+      		console.log("dup entry: " + i);
+	        resolve();
+      		return true;
+      	}
       db.News
         .create(result)
         .then(function(dbNews) {
           // If we were able to successfully scrape and save a News, send a message to the client
           console.log("scrape complete: " + i);
           // console.log(dbNews);
-          // res.send("Scrape Complete");
-          // newsArray.push(dbNews);
-          // console.log(i + ":" + newsArray);
         })//.then
         .catch(function(err) {
         	console.log("here: " + i);
@@ -29,6 +34,7 @@ function storeNews(result, i) {
           res.json(err);
         });//catch
         resolve();
+      }); //findOne .then new entry
 	}); //new Promise
 
 }
@@ -37,8 +43,6 @@ function storeNews(result, i) {
 // var News = require("../models/News.js");
 // Create all our routes and set up logic within those routes where required.
 router.get("/scrape", function(req, res) {
-	db.News.remove({});
-	// var newsArray = [];
 	var promiseArray = [];
   // First, we grab the body of the html with request
   request("https://www.smashingmagazine.com/articles/", (error, response, html) => {
@@ -68,40 +72,28 @@ router.get("/scrape", function(req, res) {
       console.log('result: ', result);
 
       //check if it is already in db
-      db.News
-      .findOne({title: result.title})
-      .then(function(dbNews) {  //check for new entry
-      	if(dbNews) {
-      		console.log("dup entry: " + i);
-      		return true;
-      	}
+      // db.News
+      // .findOne({title: result.title})
+      // .then(function(dbNews) {  //check for new entry
+      // 	if(dbNews) {
+      // 		console.log("dup entry: " + i);
+      // 		return true;
+      // 	}
 
       	promiseArray.push(storeNews(result, i));
-      // Create a new News using the `result` object built from scraping
-      // db.News
-      //   .create(result)
-      //   .then(function(dbNews) {
-      //     // If we were able to successfully scrape and save a News, send a message to the client
-      //     console.log("scrape complete: " + i);
-      //     // console.log(dbNews);
-      //     // res.send("Scrape Complete");
-      //     // newsArray.push(dbNews);
-      //     // console.log(i + ":" + newsArray);
-      //   })//.then
-      //   .catch(function(err) {
-      //   	console.log("here: " + i);
-      //     // If an error occurred, send it to the client
-      //     res.json(err);
-        // });//catch
-      }); //findOne .then new entry
+      // }); //findOne .then new entry
     });// each
+    console.log('end of loop');
     // resolve();
-	// }) //promise
-	Promise.all(promiseArray)
-	.then(function() {
-	    console.log('redirect');
-    	res.redirect("/news");
-	});
+	// })
+	// .then(function() {
+	    // console.log('redirect', promiseArray);
+		Promise.all(promiseArray)
+		.then(function() {
+		    console.log('redirect');
+	    	res.redirect("/news");
+		});//.then promise.all
+	// });//.then new promise
     // console.log(newsArray);
     // res.send(newsArray);
   });//request
@@ -139,13 +131,13 @@ router.get("/news/:id", function(req, res) {
     });
 });
 
-// Route for saving/updating an Article's associated Note
+// Route for saving/updating a News' associated comment
 router.post("/news/:id", function(req, res) {
   // Create a new note and pass the req.body to the entry
   db.Comment
     .create(req.body)
     .then(function(dbComment) {
-      // If a Note was created successfully, find one News with an `_id` equal to `req.params.id`. Update the Article to be associated with the new Comment
+      // If a Note was created successfully, find one News with an `_id` equal to `req.params.id`. Update the News to be associated with the new Comment
       // { new: true } tells the query that we want it to return the updated User -- it returns the original by default
       // Since our mongoose query returns a promise, we can chain another `.then` which receives the result of the query
       return db.News.findOneAndUpdate({ _id: req.params.id }, { note: dbComment._id }, { new: true });
@@ -158,6 +150,19 @@ router.post("/news/:id", function(req, res) {
       // If an error occurred, send it to the client
       res.json(err);
     });
+});
+
+router.delete("/news/:id", function(req, res) {
+	db.News
+	.findOne({_id: req.params.id})
+	.then(function(dbNews) {
+		db.Comment.findOne({_id: dbNews.note}).remove().exec();
+	})//.then
+	.then(function(dbComment) {
+	console.log(req.params.id);
+	db.News.update({_id: req.params.id}, {note: null}).exec();
+	});//.then
+	res.send('delete done');
 });
 
 // Export routes for server.js to use.

@@ -1,3 +1,4 @@
+var sitename = "http://www.smashingmagazine.com";
 // Grab the articles as a json
 $.getJSON("/scrape", function(data) {
 	console.log(data);
@@ -6,8 +7,8 @@ $.getJSON("/scrape", function(data) {
     // Display the apropos information on the page
     $("#news").append("<p data-id='" + data[i]._id + "'>"
                                      + data[i].title + "<br />" 
-                                     + data[i].content + "<br />" 
-                                     + data[i].link + "</p>");
+                                     + data[i].content + "<br /></p>" 
+                                     + "<a href=" + sitename + data[i].link + ">" + data[i].link + "</a>");
   }
 });
 
@@ -35,6 +36,7 @@ $(document).on("click", "p", function() {
       $("#notes").append("<textarea id='bodyinput' name='body'></textarea>");
       // A button to submit a new note, with the id of the article saved to it
       $("#notes").append("<button data-id='" + data._id + "' id='savenote'>Save Note</button>");
+      $("#notes").append("<button data-id='" + data._id + "' id='delnote'>Delete Note</button>");
 
       // If there's a note in the article
       if (data.note) {
@@ -61,6 +63,29 @@ $(document).on("click", "#savenote", function() {
       // Value taken from note textarea
       body: $("#bodyinput").val()
     }
+  })
+    // With that done
+    .done(function(data) {
+      // Log the response
+      console.log(data);
+      // Empty the notes section
+      $("#notes").empty();
+    });
+
+  // Also, remove the values entered in the input and textarea for note entry
+  $("#titleinput").val("");
+  $("#bodyinput").val("");
+}); //click save note
+
+// When you click the delete note button
+$(document).on("click", "#delnote", function() {
+  // Grab the id associated with the article from the submit button
+  var thisId = $(this).attr("data-id");
+
+  // Run a POST request to change the note, using what's entered in the inputs
+  $.ajax({
+    method: "DELETE",
+    url: "/news/" + thisId,
   })
     // With that done
     .done(function(data) {
