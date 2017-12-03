@@ -5,10 +5,23 @@ $.getJSON("/scrape", function(data) {
   // For each one
   for (var i = 0; i < data.length; i++) {
     // Display the apropos information on the page
-    $("#news").append("<p data-id='" + data[i]._id + "'>"
-                                     + data[i].title + "<br />" 
-                                     + data[i].content + "<br /></p>" 
-                                     + "<a href=" + sitename + data[i].link + ">" + data[i].link + "</a>");
+    var ptag = $('<p>');
+    ptag.attr('data-id', data[i]._id);
+    ptag.html(`<h4 style="margin:5px;">${data[i].title}</h4> ${data[i].content}`);
+    ptag.css('margin-bottom', '2px');
+    $("#news").append(ptag);
+    if (data[i].link) {
+      var atag = $('<a>');
+      atag.attr('href', sitename + data[i].link);
+      atag.text("link");
+      $("#news").append(atag);
+    }
+
+    // $("#news").append("<p data-id='" + data[i]._id + "'>"
+    //                                  + data[i].title + "<br />" 
+    //                                  + data[i].content + "<br /></p>" 
+    //                                  + "<a href=" + sitename + data[i].link + ">link</a>");
+    //                                  // + "<a href=" + "#" + ">link</a>");
   }
 });
 
