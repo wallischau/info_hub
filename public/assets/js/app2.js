@@ -1,9 +1,3 @@
-/*  News Scraper                                 */
-/*  Author: Wallis Chau                          */
-/*  Description: Scrap news from a websitee      */
-/*               and store in db along with comment */
-/*  Date: 11/25/17                                */
-
 var sitename = "http://www.smashingmagazine.com";
 // Grab the articles as a json
 $.getJSON("/scrape", function(data) {
@@ -22,8 +16,7 @@ $.getJSON("/scrape", function(data) {
       atag.text("link");
       $("#news").append(atag);
     }
-
-  }
+  }//for
 });
 
 

@@ -1,3 +1,8 @@
+/*  News Scraper                                 */
+/*  Author: Wallis Chau                          */
+/*  Description: Scrap news from a websitee      */
+/*               and store in db along with comment */
+/*  Date: 11/25/17                                */
 var express = require("express");
 var bodyParser = require("body-parser");
 var logger = require("morgan");

@@ -1,3 +1,8 @@
+/*  News Scraper                                 */
+/*  Author: Wallis Chau                          */
+/*  Description: Scrap news from a websitee      */
+/*               and store in db along with comment */
+/*  Date: 11/25/17                                */
 var mongoose = require("mongoose");
 // Save a reference to the Schema constructor
 var Schema = mongoose.Schema;

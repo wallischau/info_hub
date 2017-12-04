@@ -1,3 +1,8 @@
+/*  News Scraper                                 */
+/*  Author: Wallis Chau                          */
+/*  Description: Scrap news from a websitee      */
+/*               and store in db along with comment */
+/*  Date: 11/25/17                                */
 var express = require("express");
 var mongoose = require("mongoose");
 
@@ -71,14 +76,6 @@ router.get("/scrape", function(req, res) {
         .attr("href");
       console.log('result: ', result);
 
-      //check if it is already in db
-      // db.News
-      // .findOne({title: result.title})
-      // .then(function(dbNews) {  //check for new entry
-      // 	if(dbNews) {
-      // 		console.log("dup entry: " + i);
-      // 		return true;
-      // 	}
 
       	promiseArray.push(storeNews(result, i));
       // }); //findOne .then new entry
@@ -94,8 +91,6 @@ router.get("/scrape", function(req, res) {
 	    	res.redirect("/news");
 		});//.then promise.all
 	// });//.then new promise
-    // console.log(newsArray);
-    // res.send(newsArray);
   });//request
 });//get /
 
